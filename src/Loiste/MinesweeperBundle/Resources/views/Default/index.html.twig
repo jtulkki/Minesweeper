@@ -12,8 +12,9 @@ Start new game:
 </p>
 
 <table id="game" data-route-make-move="{{ path('LoisteMinesweeperBundle_makeMove') }}">
+    {# Define global variables. #}
     {% set gameArea = game.gameArea %}
-    {% set solved = game.isSolved() %}
+    {% set gameOver = game.isGameOver() %}
     {% for row in 0..game.numRows - 1 %}
     <tr>
         {% for column in 0..game.numColumns - 1 %}
@@ -33,7 +34,7 @@ Start new game:
                 {% else %}
                 <img src="{{ asset('bundles/loisteminesweeper/images/' ~ number ~ '.png') }}" />
                 {% endif %}
-            {% elseif solved and mine %}
+            {% elseif gameOver and mine %}
             <img src="{{ asset('bundles/loisteminesweeper/images/mine.png') }}" />
             {% else %}                
             <img src="{{ asset('bundles/loisteminesweeper/images/cell.png') }}" />

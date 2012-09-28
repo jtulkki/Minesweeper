@@ -15,18 +15,28 @@ class Game
      * @var array
      */
     public $gameArea;
+    /**
+     * Number of rows in the game area.
+     */
     public $numRows;
+    /**
+     * Number of columns in the game area.
+     */
     public $numColumns;
+    /**
+     * Percentage on mines in the field.
+     */
     public $percentageMines;
 
-    public function __construct($percentageMines)
+    public function __construct($percentageMines, $numRows = 8, $numColumns = 8)
     {
         // Upon constructing a new game instance, setup an empty game area.
         $this->gameArea = array();
         $this->percentageMines = $percentageMines;
-        $this->numRows = 8;
-        $this->numColumns = 8;
+        $this->numRows = $numRows;
+        $this->numColumns = $numColumns;
 
+        // Initialized the game area and the mines.
         for ($row = 0; $row < $this->numRows; $row++) {
 
             $temp = array();
@@ -38,6 +48,7 @@ class Game
             $this->gameArea[] = $temp;
         }
 
+        // Calculate the number of mines around each position.
         for ($row = 0; $row < $this->numRows; $row++) {
             for ($column = 0; $column < $this->numColumns; $column++) {
                 $this->gameArea[$row][$column]->number = $this->getNumber($row, $column);
@@ -45,6 +56,10 @@ class Game
         }
     }   
     
+    /** 
+     * Check if the given poisition has a mine. If the position is outside
+     * the playing field, return false.
+     */
     private function isMine($row, $column)
     {
     	if ($row >= 0 && $column >= 0 && $row < $this->numRows && $column < $this->numColumns) {
@@ -53,7 +68,10 @@ class Game
     	    return false;
     	}
     }
-    
+
+    /**
+     * Returns the number of mines around the given position.
+     */   
     private function getNumber($row, $column)
     {
     	$count = 0;
@@ -69,6 +87,12 @@ class Game
         return $count;
     }
 
+    /**
+     * Discovers a new position. If the position has no neighboring mines, 
+     * neighboring positions are also discovered recursively.
+     * If the position is already discovered or is outside the game area then 
+     * do nothing.
+     */
     public function discover($row, $column)
     {
     	if ($row >= 0 && $column >= 0 && $row < $this->numRows && $column < $this->numColumns &&
@@ -84,15 +108,38 @@ class Game
     	}
     }
     
+    /**
+     * Checks if the game is solved. The game is solved when all positions
+     * have been solved.
+     */
     public function isSolved() {
         for ($row = 0; $row < $this->numRows; $row++) {
             for ($column = 0; $column < $this->numColumns; $column++) {
-            	if ($this->gameArea[$row][$column]->isMine() == 
-            	    $this->gameArea[$row][$column]->isDiscovered()) {
+            	if (!$this->gameArea[$row][$column]->isSolved()) {
             	    return false;
             	}
             }
         }
         return true;
+    }
+
+    /**
+     * Checks if the game is over. The game is over when it has either been 
+     * solved or a mine has exploded.
+     */
+    public function isGameOver() {
+        // Check if the game is solved.
+        if ($this->isSolved()) {
+            return true;
+        }
+        // Check if a mine has exploded.
+        for ($row = 0; $row < $this->numRows; $row++) {
+            for ($column = 0; $column < $this->numColumns; $column++) {
+            	if ($this->gameArea[$row][$column]->hasExploded()) {
+            	    return true;
+            	}
+            }
+        }
+        return false;
     }
 }
